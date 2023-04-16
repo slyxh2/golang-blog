@@ -24,22 +24,6 @@ func CreateUserController(db *mongo.Database) *userController {
 	}
 }
 
-func (uc *userController) CreateUser(c *gin.Context) {
-	user := models.User{
-		Id: primitive.NewObjectID(),
-		// Password: "ooooo",
-	}
-	err := uc.ur.Create(context.Background(), &user)
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
-}
 func (uc *userController) SignUp(c *gin.Context) {
 	var request interfaces.SignupRequest
 	err := c.ShouldBind(&request)
@@ -69,16 +53,5 @@ func (uc *userController) SignUp(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"ok": true,
-	})
-}
-func TestController(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
-}
-
-func AddUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"add": "OK",
 	})
 }

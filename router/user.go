@@ -8,6 +8,5 @@ import (
 
 func HandleUserRouter(router *gin.Engine, db *mongo.Database) {
 	uc := controllers.CreateUserController(db)
-	router.GET("/add", uc.CreateUser)
 	router.POST("/sign-up", uc.SignUp)
 }
