@@ -5,8 +5,7 @@ import (
 )
 
 type User struct {
-	Id     primitive.ObjectID `bson:"_id" json:"id"`
-	Name   string             `bson:"name" json:"name"`
-	Gender string             `bson:"gender" json:"gender"`
-	Age    int                `bson:"age" json:"age"`
+	Id       primitive.ObjectID `bson:"_id" json:"id"`
+	UserName string             `bson:"username" json:"username"`
+	Password []byte             `bson:"password" json:"password"`
 }
