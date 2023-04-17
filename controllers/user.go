@@ -8,8 +8,10 @@ import (
 	"github.com/slyxh2/golang-blog/interfaces"
 	"github.com/slyxh2/golang-blog/models"
 	"github.com/slyxh2/golang-blog/repository"
+	"github.com/slyxh2/golang-blog/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userController struct {
@@ -23,14 +25,27 @@ func CreateUserController(db *mongo.Database) *userController {
 	}
 }
 
-func (uc *userController) CreateUser(c *gin.Context) {
-	user := models.User{
-		Id:     primitive.NewObjectID(),
-		Name:   "Patrick",
-		Age:    24,
-		Gender: "male",
+func (uc *userController) SignUp(c *gin.Context) {
+	var request interfaces.SignupRequest
+	err := c.ShouldBind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, interfaces.ErrorResponse{Message: err.Error()})
+		return
 	}
-	err := uc.ur.Create(context.Background(), &user)
+	encryptedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(request.Password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.ErrorResponse{Message: err.Error()})
+		return
+	}
+	user := models.User{
+		Id:       primitive.NewObjectID(),
+		UserName: request.UserName,
+		Password: encryptedPassword,
+	}
+	err = uc.ur.Create(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
@@ -38,17 +53,34 @@ func (uc *userController) CreateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
-}
-func TestController(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
+		"ok": true,
 	})
 }
 
-func AddUser(c *gin.Context) {
+func (uc *userController) Login(c *gin.Context) {
+	var request interfaces.SignupRequest
+	err := c.ShouldBind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, interfaces.ErrorResponse{Message: err.Error()})
+		return
+	}
+	user, err := uc.ur.GetUserByUsername(c, request.UserName)
+	if err != nil {
+		c.JSON(http.StatusNotFound, interfaces.ErrorResponse{Message: "User not found with the given email"})
+		return
+	}
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)) != nil {
+		c.JSON(http.StatusUnauthorized, interfaces.ErrorResponse{Message: "Invalid credentials"})
+		return
+	}
+	token, err := utils.CreateJWTToken(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, interfaces.ErrorResponse{Message: err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"add": "OK",
+		"ok":    true,
+		"token": token,
 	})
+
 }
