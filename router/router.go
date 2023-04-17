@@ -17,6 +17,7 @@ func Init(client *mongo.Client) {
 
 	protectedRouter := router.Group("")
 	protectedRouter.Use(middleware.JwtMiddleware())
+	HandlePostRouter(protectedRouter, db)
 	protectedRouter.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
