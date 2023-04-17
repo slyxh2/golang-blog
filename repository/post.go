@@ -44,7 +44,7 @@ func (pr *postRepository) Upload(c *gin.Context, file multipart.File, post *mode
 	// Create an uploader with the session and default options
 	uploader := s3manager.NewUploader(sess)
 	bucket := os.Getenv("BUCKET_NAME")
-	key := post.Header + ".md"
+	key := post.Id.String() + ".md"
 
 	// Upload the file to S3.
 	result, err := uploader.Upload(&s3manager.UploadInput{

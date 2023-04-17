@@ -54,16 +54,3 @@ func (pc *PostController) UploadPost(c *gin.Context) {
 		"result": result,
 	})
 }
-
-func (pc *PostController) TestUpload(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusGone, gin.H{
-		"result": file,
-	})
-}
