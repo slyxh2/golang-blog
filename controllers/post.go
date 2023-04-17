@@ -16,7 +16,10 @@ type PostController struct {
 }
 
 func CreatePostController(db *mongo.Database) *PostController {
-	pr := repository.NewPostRepository(db)
+	pr, err := repository.NewPostRepository(db)
+	if err != nil {
+		return nil
+	}
 	return &PostController{
 		pr: pr,
 	}
@@ -52,5 +55,19 @@ func (pc *PostController) UploadPost(c *gin.Context) {
 	}
 	c.JSON(http.StatusGone, gin.H{
 		"result": result,
+	})
+}
+
+func (pc *PostController) GetPost(c *gin.Context) {
+	postId := c.Query("id")
+	content, err := pc.pr.DownLoad(postId)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusGone, gin.H{
+		"content": content,
 	})
 }

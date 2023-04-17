@@ -9,4 +9,5 @@ import (
 func HandlePostRouter(router *gin.RouterGroup, db *mongo.Database) {
 	pc := controllers.CreatePostController(db)
 	router.POST("/upload", pc.UploadPost)
+	router.GET("/getpost", pc.GetPost)
 }
