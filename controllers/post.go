@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/slyxh2/golang-blog/interfaces"
@@ -31,6 +32,7 @@ func (pc *PostController) UploadPost(c *gin.Context) {
 	post := &models.Post{
 		Id:     primitive.NewObjectID(),
 		Header: request.Header,
+		Date:   time.Now(),
 	}
 	file, err := c.FormFile("file")
 	if err != nil {
