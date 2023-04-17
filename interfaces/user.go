@@ -17,4 +17,5 @@ type SignupRequest struct {
 
 type UserRepository interface {
 	Create(context.Context, *models.User) error
+	GetUserByUsername(context.Context, string) (models.User, error)
 }

@@ -9,4 +9,5 @@ import (
 func HandleUserRouter(router *gin.Engine, db *mongo.Database) {
 	uc := controllers.CreateUserController(db)
 	router.POST("/sign-up", uc.SignUp)
+	router.POST("/login", uc.Login)
 }
