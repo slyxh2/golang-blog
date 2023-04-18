@@ -7,6 +7,7 @@ import (
 	"github.com/slyxh2/golang-blog/interfaces"
 	"github.com/slyxh2/golang-blog/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -53,4 +54,31 @@ func (cr *categoryRepository) Create(c *gin.Context, category *models.Category) 
 	}
 	_, err = collection.InsertOne(c, category)
 	return err
+}
+
+func (cr *categoryRepository) Get(c *gin.Context, id string) (models.Category, error) {
+	collection := cr.database.Collection(cr.collection)
+	var category models.Category
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return category, err
+	}
+	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&category)
+	if err != nil {
+		return category, errors.New("Invilid Category Id")
+	}
+	return category, nil
+}
+
+func (cr *categoryRepository) Delete(c *gin.Context, id string) error {
+	collection := cr.database.Collection(cr.collection)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	result := collection.FindOneAndDelete(c, bson.M{"_id": objID})
+	if result.Err() != nil {
+		return result.Err()
+	}
+	return nil
 }

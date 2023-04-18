@@ -8,6 +8,8 @@ import (
 
 func HandleCategoryRouter(router *gin.RouterGroup, db *mongo.Database) {
 	cr := controllers.CreateCategoryController(db)
-	router.GET("all-category", cr.GetAllCategory)
-	router.POST("create-category", cr.CreateCategory)
+	router.GET("/all-category", cr.GetAllCategory)
+	router.POST("/create-category", cr.CreateCategory)
+	router.GET("/category", cr.GetCategory)
+	router.DELETE("/delete-category", cr.DeleteCategory)
 }

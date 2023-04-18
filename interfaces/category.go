@@ -13,6 +13,8 @@ const (
 type CategoryRepository interface {
 	Create(*gin.Context, *models.Category) error
 	GetAll(*gin.Context) ([]GetAllCategoryresponse, error)
+	Get(*gin.Context, string) (models.Category, error)
+	Delete(*gin.Context, string) error
 }
 
 type CreateCategoryRequest struct {

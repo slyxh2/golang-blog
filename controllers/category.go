@@ -35,6 +35,22 @@ func (cc *CategoryController) GetAllCategory(c *gin.Context) {
 	})
 }
 
+func (cc *CategoryController) GetCategory(c *gin.Context) {
+	id := c.Query("id")
+	category, err := cc.cr.Get(c, id)
+	if err != nil {
+		if err != nil {
+			c.JSON(http.StatusGone, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": category,
+	})
+}
+
 func (cc *CategoryController) CreateCategory(c *gin.Context) {
 	var request interfaces.CreateCategoryRequest
 	c.ShouldBind(&request)
@@ -44,6 +60,20 @@ func (cc *CategoryController) CreateCategory(c *gin.Context) {
 		Posts: []models.Post{},
 	}
 	err := cc.cr.Create(c, category)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ok": true,
+	})
+}
+
+func (cc *CategoryController) DeleteCategory(c *gin.Context) {
+	id := c.Query("id")
+	err := cc.cr.Delete(c, id)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
