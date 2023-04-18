@@ -87,3 +87,32 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 		"ok": true,
 	})
 }
+
+func (pc *PostController) EditPost(c *gin.Context) {
+	var request interfaces.EditPostRequest
+	c.ShouldBind(&request)
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	readfile, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = pc.pr.Edit(c, request.Id, readfile)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ok": true,
+	})
+}

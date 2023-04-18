@@ -11,4 +11,5 @@ func HandlePostRouter(router *gin.RouterGroup, db *mongo.Database) {
 	router.POST("/upload", pc.UploadPost)
 	router.GET("/getpost", pc.GetPost)
 	router.DELETE("/delete-post", pc.DeletePost)
+	router.POST("/edit-post", pc.EditPost)
 }

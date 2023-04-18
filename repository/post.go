@@ -140,3 +140,27 @@ func (pr *postRepository) Delete(c *gin.Context, id string) error {
 	}
 	return nil
 }
+
+func (pr *postRepository) Edit(c *gin.Context, id string, file multipart.File) error {
+	awsClient := s3.New(pr.awsSession)
+	bucket := os.Getenv("BUCKET_NAME")
+	key := id + ".md"
+	_, err := awsClient.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+
+	uploader := s3manager.NewUploader(pr.awsSession)
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+		Body:   file,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
