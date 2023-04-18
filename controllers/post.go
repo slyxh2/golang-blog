@@ -130,3 +130,16 @@ func (pc *PostController) GetOnePost(c *gin.Context) {
 		"post": post,
 	})
 }
+
+func (pc *PostController) GetAllPost(c *gin.Context) {
+	posts, err := pc.pr.GetAll(c)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"posts": posts,
+	})
+}

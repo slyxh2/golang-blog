@@ -18,6 +18,7 @@ type PostRepository interface {
 	Delete(*gin.Context, string) error
 	Edit(*gin.Context, string, string, multipart.File) error
 	GetOne(c *gin.Context, id string) (models.Post, error)
+	GetAll(c *gin.Context) ([]models.Post, error)
 }
 
 type UploadPostRequest struct {

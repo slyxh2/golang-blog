@@ -189,3 +189,22 @@ func (pr *postRepository) GetOne(c *gin.Context, id string) (models.Post, error)
 	}
 	return post, nil
 }
+
+func (pr *postRepository) GetAll(c *gin.Context) ([]models.Post, error) {
+	collection := pr.database.Collection(pr.collection)
+	cursor, err := collection.Find(c, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(c)
+	var posts []models.Post
+	for cursor.Next(c) {
+		var post models.Post
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
