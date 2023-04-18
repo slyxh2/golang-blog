@@ -14,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/slyxh2/golang-blog/interfaces"
 	"github.com/slyxh2/golang-blog/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -40,9 +42,12 @@ func NewPostRepository(db *mongo.Database) (*postRepository, error) {
 	}, nil
 }
 
-func (pr *postRepository) Upload(c *gin.Context, file multipart.File, post *models.Post) (*s3manager.UploadOutput, error) {
+func (pr *postRepository) Upload(c *gin.Context, file multipart.File, post *models.Post, categoryId string) (*s3manager.UploadOutput, error) {
 	if file == nil {
 		return nil, errors.New("file is nil")
+	}
+	if categoryId == "" {
+		return nil, errors.New("lack category id")
 	}
 	// Create an uploader with the session and default options
 	uploader := s3manager.NewUploader(pr.awsSession)
@@ -58,6 +63,18 @@ func (pr *postRepository) Upload(c *gin.Context, file multipart.File, post *mode
 	if err != nil {
 		return nil, err
 	}
+
+	var category models.Category
+	categoryCollection := pr.database.Collection(interfaces.CollectionCategory)
+	objID, err := primitive.ObjectIDFromHex(categoryId)
+	if err != nil {
+		return nil, err
+	}
+	err = categoryCollection.FindOneAndUpdate(c, bson.M{"_id": objID}, bson.M{"$push": bson.M{"posts": post}}).Decode(&category)
+	if err != nil {
+		return nil, err
+	}
+	post.Category = category
 
 	collection := pr.database.Collection(pr.collection)
 	_, err = collection.InsertOne(c, post)

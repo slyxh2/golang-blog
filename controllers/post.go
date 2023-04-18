@@ -48,14 +48,14 @@ func (pc *PostController) UploadPost(c *gin.Context) {
 		})
 		return
 	}
-	result, err := pc.pr.Upload(c, readfile, post)
+	result, err := pc.pr.Upload(c, readfile, post, request.CategoryId)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusGone, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"result": result,
 	})
 }

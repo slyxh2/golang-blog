@@ -13,11 +13,12 @@ const (
 )
 
 type PostRepository interface {
-	Upload(*gin.Context, multipart.File, *models.Post) (*s3manager.UploadOutput, error)
+	Upload(*gin.Context, multipart.File, *models.Post, string) (*s3manager.UploadOutput, error)
 	DownLoad(id string) (string, error)
 }
 
 type UploadPostRequest struct {
-	Header string         `form:"header" binding:"required"`
-	File   multipart.File `form:"post" binding:"required"`
+	Header     string         `form:"header" binding:"required"`
+	CategoryId string         `form:"categoryId" binding:"required"`
+	File       multipart.File `form:"post" binding:"required"`
 }
