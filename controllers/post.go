@@ -69,7 +69,21 @@ func (pc *PostController) GetPost(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusGone, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"content": content,
+	})
+}
+
+func (pc *PostController) DeletePost(c *gin.Context) {
+	postId := c.Query("id")
+	err := pc.pr.Delete(c, postId)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ok": true,
 	})
 }

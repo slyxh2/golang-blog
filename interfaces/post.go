@@ -15,6 +15,7 @@ const (
 type PostRepository interface {
 	Upload(*gin.Context, multipart.File, *models.Post, string) (*s3manager.UploadOutput, error)
 	DownLoad(id string) (string, error)
+	Delete(*gin.Context, string) error
 }
 
 type UploadPostRequest struct {

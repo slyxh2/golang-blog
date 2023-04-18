@@ -103,3 +103,40 @@ func (pr *postRepository) DownLoad(id string) (string, error) {
 
 	return string(body), nil
 }
+
+func (pr *postRepository) Delete(c *gin.Context, id string) error {
+	collection := pr.database.Collection(pr.collection)
+	categoryCollection := pr.database.Collection(interfaces.CollectionCategory)
+	var post models.Post
+	postID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	err = collection.FindOneAndDelete(c, bson.M{"_id": postID}).Decode(&post)
+	if err != nil {
+		return err
+	}
+	categoryId := post.Category.Id
+
+	filter := bson.M{"_id": categoryId}
+
+	// define the update to remove the post with the given postId
+	update := bson.M{"$pull": bson.M{"posts": bson.M{"_id": postID}}}
+
+	// execute the update operation with the filter and update
+	_, err = categoryCollection.UpdateOne(c, filter, update)
+	if err != nil {
+		return err
+	}
+	awsClient := s3.New(pr.awsSession)
+	bucket := os.Getenv("BUCKET_NAME")
+	key := id + ".md"
+	_, err = awsClient.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
