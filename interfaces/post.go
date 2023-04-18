@@ -1,0 +1,33 @@
+package interfaces
+
+import (
+	"mime/multipart"
+
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/gin-gonic/gin"
+	"github.com/slyxh2/golang-blog/models"
+)
+
+const (
+	CollectionPost = "posts"
+)
+
+type PostRepository interface {
+	Upload(*gin.Context, multipart.File, *models.Post, string) (*s3manager.UploadOutput, error)
+	DownLoad(id string) (string, error)
+	Delete(*gin.Context, string) error
+	Edit(*gin.Context, string, string, multipart.File) error
+	GetOne(c *gin.Context, id string) (models.Post, error)
+	GetAll(c *gin.Context) ([]models.Post, error)
+}
+
+type UploadPostRequest struct {
+	Header     string         `form:"header" binding:"required"`
+	CategoryId string         `form:"categoryId" binding:"required"`
+	File       multipart.File `form:"post" binding:"required"`
+}
+
+type EditPostRequest struct {
+	Id     string `form:"id" binding:"required"`
+	Header string `form:"header" binding:"required"`
+}
