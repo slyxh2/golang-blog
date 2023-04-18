@@ -15,12 +15,16 @@ type CategoryRepository interface {
 	GetAll(*gin.Context) ([]GetAllCategoryresponse, error)
 	Get(*gin.Context, string) (models.Category, error)
 	Delete(*gin.Context, string) error
+	Edit(*gin.Context, string, string) error
 }
 
 type CreateCategoryRequest struct {
 	Name string `form:"name" binding:"required"`
 }
-
+type EditCategoryRequest struct {
+	Name string `form:"name" binding:"required"`
+	Id   string `form:"id" binding:"required"`
+}
 type GetAllCategoryresponse struct {
 	Name string             `bson:"name" json:"name"`
 	Id   primitive.ObjectID `bson:"_id" json:"id"`

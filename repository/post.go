@@ -141,7 +141,18 @@ func (pr *postRepository) Delete(c *gin.Context, id string) error {
 	return nil
 }
 
-func (pr *postRepository) Edit(c *gin.Context, id string, file multipart.File) error {
+func (pr *postRepository) Edit(c *gin.Context, id string, header string, file multipart.File) error {
+	if header != "" {
+		collection := pr.database.Collection(pr.collection)
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return err
+		}
+		_, err = collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"header": header}})
+		if err != nil {
+			return err
+		}
+	}
 	awsClient := s3.New(pr.awsSession)
 	bucket := os.Getenv("BUCKET_NAME")
 	key := id + ".md"
@@ -163,4 +174,18 @@ func (pr *postRepository) Edit(c *gin.Context, id string, file multipart.File) e
 		return err
 	}
 	return nil
+}
+
+func (pr *postRepository) GetOne(c *gin.Context, id string) (models.Post, error) {
+	collection := pr.database.Collection(pr.collection)
+	objID, err := primitive.ObjectIDFromHex(id)
+	var post models.Post
+	if err != nil {
+		return post, err
+	}
+	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&post)
+	if err != nil {
+		return post, err
+	}
+	return post, nil
 }

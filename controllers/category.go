@@ -84,3 +84,18 @@ func (cc *CategoryController) DeleteCategory(c *gin.Context) {
 		"ok": true,
 	})
 }
+
+func (cc *CategoryController) EditCategory(c *gin.Context) {
+	var request interfaces.EditCategoryRequest
+	c.ShouldBind(&request)
+	err := cc.cr.Edit(c, request.Id, request.Name)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ok": true,
+	})
+}

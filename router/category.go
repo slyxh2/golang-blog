@@ -12,4 +12,5 @@ func HandleCategoryRouter(router *gin.RouterGroup, db *mongo.Database) {
 	router.POST("/create-category", cr.CreateCategory)
 	router.GET("/category", cr.GetCategory)
 	router.DELETE("/delete-category", cr.DeleteCategory)
+	router.POST("/edit-category", cr.EditCategory)
 }

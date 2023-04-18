@@ -82,3 +82,16 @@ func (cr *categoryRepository) Delete(c *gin.Context, id string) error {
 	}
 	return nil
 }
+
+func (cr *categoryRepository) Edit(c *gin.Context, id string, name string) error {
+	collection := cr.database.Collection(cr.collection)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	_, err = collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"name": name}})
+	if err != nil {
+		return err
+	}
+	return nil
+}

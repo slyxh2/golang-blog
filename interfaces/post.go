@@ -16,7 +16,8 @@ type PostRepository interface {
 	Upload(*gin.Context, multipart.File, *models.Post, string) (*s3manager.UploadOutput, error)
 	DownLoad(id string) (string, error)
 	Delete(*gin.Context, string) error
-	Edit(*gin.Context, string, multipart.File) error
+	Edit(*gin.Context, string, string, multipart.File) error
+	GetOne(c *gin.Context, id string) (models.Post, error)
 }
 
 type UploadPostRequest struct {
@@ -26,5 +27,6 @@ type UploadPostRequest struct {
 }
 
 type EditPostRequest struct {
-	Id string `form:"id" binding:"required"`
+	Id     string `form:"id" binding:"required"`
+	Header string `form:"header" binding:"required"`
 }

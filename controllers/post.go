@@ -105,7 +105,7 @@ func (pc *PostController) EditPost(c *gin.Context) {
 		})
 		return
 	}
-	err = pc.pr.Edit(c, request.Id, readfile)
+	err = pc.pr.Edit(c, request.Id, request.Header, readfile)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
@@ -114,5 +114,19 @@ func (pc *PostController) EditPost(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"ok": true,
+	})
+}
+
+func (pc *PostController) GetOnePost(c *gin.Context) {
+	postId := c.Query("id")
+	post, err := pc.pr.GetOne(c, postId)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"post": post,
 	})
 }
