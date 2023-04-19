@@ -15,7 +15,7 @@ func Init(client *mongo.Client) {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3006"}
+	config.AllowOrigins = []string{"*"}
 	config.AllowMethods = []string{"GET", "POST", "DELETE"}
 	config.AllowHeaders = []string{"Origin", "Authorization", "Content-Type"}
 	router.Use(cors.New(config))
@@ -24,6 +24,7 @@ func Init(client *mongo.Client) {
 	HandleUserRouter(router, db)
 
 	protectedRouter := router.Group("")
+	// protectedRouter.Use(cors.New(config))
 	protectedRouter.Use(middleware.JwtMiddleware())
 	HandlePostRouter(protectedRouter, db)
 	HandleCategoryRouter(protectedRouter, db)
