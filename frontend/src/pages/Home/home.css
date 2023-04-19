@@ -1,0 +1,15 @@
+#home-container{
+    display: flex;
+    flex-direction: row;
+    width: 95vw;
+    justify-content: space-between;
+    margin: 3vw auto;
+    border: 1px solid red;
+    position: sticky;
+    top:0;
+}
+
+#sidebar{
+    flex-shrink: 0;
+    width: 200px;
+}

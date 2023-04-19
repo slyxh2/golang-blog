@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react"
+import env from "react-dotenv";
 
 const useLogin = () => {
-    const token = process.env.LOGIN_TOKEN;
+    const token = env.AUTH_TOKEN;
     const [isLog, setIsLog] = useState(false);
     useEffect(() => {
-        sessionStorage.getItem(token) ? setIsLog(true) : setIsLog(false);
+        if (sessionStorage.getItem(token)) {
+            setIsLog(true)
+        }
     }, [])
     return isLog;
 }
