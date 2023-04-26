@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import useLogin from "../hooks/useLogin";
+import EditCategory from "../pages/EditCategory";
 import AddPost from "../pages/AddPost";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -25,6 +26,9 @@ const authRouterPath = [
         }, {
             path: "add-post",
             element: <AddPost />
+        }, {
+            path: "edit-category",
+            element: <EditCategory />
         }]
     }
 ]

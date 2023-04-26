@@ -1,17 +1,20 @@
-import React, { useRef } from 'react';
-import { useMemo, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useState, useContext } from 'react';
 import { Select, Input, Button, Alert } from 'antd';
 import { UploadOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 import Markdown from '../../components/Markdown';
 import { debounce } from '../../utils';
-import { getAllCategory, uploadPost } from '../../api';
+import { uploadPost } from '../../api';
+import { CategoryContext } from '../../context';
+
 import './addPost.css';
 const AddPost = () => {
     const textRef = useRef();
     const uploadRef = useRef();
     const nagivate = useNavigate();
+    const categoryContext = useContext(CategoryContext);
     const [input, setInput] = useState(""); // markdown input
     const [allCategories, setAllCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("");
@@ -19,16 +22,6 @@ const AddPost = () => {
     const handleInput = debounce((e) => {
         setInput(e.target.value);
     }, 500);
-    useMemo(async () => {
-        let res = await getAllCategory();
-        let all = res.data.categories.map(category => {
-            let obj = {};
-            obj.value = category.id;
-            obj.label = category.name;
-            return obj;
-        })
-        setAllCategories(all);
-    }, []);
     const handleCategotySelect = (val) => {
         setSelectedCategory(val);
     }
@@ -56,6 +49,9 @@ const AddPost = () => {
             nagivate('/');
         }).catch(err => console.log(err));
     }
+    useEffect(() => {
+        setAllCategories(categoryContext);
+    }, [categoryContext])
     return <>
         <div id="tools-container">
             <Select

@@ -1,13 +1,16 @@
-import SidebarItem from './SidebarItem';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { DownOutlined } from '@ant-design/icons'
-import './sidebar.css'
-import { useEffect, useRef, useState } from 'react';
-import { getAllCategory } from '../../api';
 import { useNavigate } from 'react-router-dom';
+
+import { CategoryContext } from '../../context';
+import SidebarItem from './SidebarItem';
+import './sidebar.css'
+
 const Sidebar = () => {
     const dropdownList = useRef();
     const dropdownIcon = useRef();
-    const [category, setCategory] = useState([]);
+    const [category, setCategory] = useState(null);
+    const categoryContext = useContext(CategoryContext);
     const [isLoading, setIsLoading] = useState(true);
     const nagivate = useNavigate();
     const handleCollapse = () => {
@@ -28,21 +31,27 @@ const Sidebar = () => {
     const handleClickBarItem = (id) => {
         nagivate("/" + id);
     }
-
     useEffect(() => {
-        getAllCategory().then(res => {
-            setCategory(res.data.categories);
-            setIsLoading(false);
-        })
-    }, [])
+        setCategory(categoryContext);
+        setIsLoading(false);
+    }, [categoryContext])
+    // useEffect(() => {
+    //     getAllCategory().then(res => {
+    //         setCategory(res.data.categories);
+    //         setIsLoading(false);
+    //     })
+    // }, [])
     if (isLoading) return <div>LOADING...</div>
+
     return <div id="sidebar">
         <SidebarItem
             onClick={() => nagivate("/add-post")}
         >
             New Post
         </SidebarItem>
-        <SidebarItem>New Category</SidebarItem>
+        <SidebarItem
+            onClick={() => nagivate("/edit-category")}
+        >Edit Category</SidebarItem>
         <SidebarItem
             onClick={() => nagivate("/")}
         >
@@ -58,10 +67,10 @@ const Sidebar = () => {
         <ul className='drop-list' ref={dropdownList}>
             {
                 category.map(item => <li
-                    key={item.id}
-                    onClick={() => handleClickBarItem(item.id)}>
+                    key={item.value}
+                    onClick={() => handleClickBarItem(item.value)}>
                     <SidebarItem>
-                        {item.name}
+                        {item.label}
                     </SidebarItem>
                 </li>)
             }
