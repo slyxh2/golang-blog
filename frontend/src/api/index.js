@@ -36,11 +36,31 @@ const createCategory = (name) => {
     return axios.post('/create-category', { name });
 }
 
+const getPosts = (page, size, category) => {
+    return axios.get('/allpost', {
+        params: {
+            page,
+            size,
+            category
+        }
+    })
+}
+
+const deletePost = (id) => {
+    return axios.delete('/delete-post', {
+        params: {
+            id
+        }
+    })
+}
+
 export {
     handleLogin,
     getAllCategory,
     uploadPost,
     deleteCategory,
     editCategoty,
-    createCategory
+    createCategory,
+    getPosts,
+    deletePost
 }
