@@ -25,9 +25,17 @@ const deleteCategory = (id) => {
     })
 }
 
+const editCategoty = (id, name) => {
+    return axios.post('/edit-category', {
+        id,
+        name
+    })
+}
+
 export {
     handleLogin,
     getAllCategory,
     uploadPost,
-    deleteCategory
+    deleteCategory,
+    editCategoty
 }
