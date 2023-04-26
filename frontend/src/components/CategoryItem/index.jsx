@@ -1,12 +1,13 @@
 import React from 'react';
 import { useState } from 'react';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+
 import { Modal, Input } from 'antd';
-import './categoryItem.css';
-import { deleteCategory, editCategoty } from '../../api';
 import { useNavigate } from 'react-router-dom';
+
+import { deleteCategory, editCategoty } from '../../api';
+import Item from '../Item';
+
 const CategoryItem = (props) => {
-    console.log('Item');
     const { category, id } = props;
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -29,15 +30,11 @@ const CategoryItem = (props) => {
         setEditOpen(false)
     }
     return <>
-        <div className="category-item-container">
-            <p>{category}</p>
-            <div className="flex-left edit-icon" onClick={() => setEditOpen(true)}>
-                <EditOutlined />
-            </div>
-            <div className='edit-icon delete-icon' onClick={() => setDeleteOpen(true)}>
-                <DeleteOutlined />
-            </div>
-        </div>
+        <Item
+            name={category}
+            onEdit={() => setEditOpen(true)}
+            onDelete={() => setDeleteOpen(true)}
+        />
         <Modal
             title={`Are you sure to delete ${category}`}
             open={deleteOpen}
