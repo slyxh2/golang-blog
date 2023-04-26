@@ -32,10 +32,15 @@ const editCategoty = (id, name) => {
     })
 }
 
+const createCategory = (name) => {
+    return axios.post('/create-category', { name });
+}
+
 export {
     handleLogin,
     getAllCategory,
     uploadPost,
     deleteCategory,
-    editCategoty
+    editCategoty,
+    createCategory
 }

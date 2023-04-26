@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Modal, Input } from 'antd';
@@ -5,6 +6,7 @@ import './categoryItem.css';
 import { deleteCategory, editCategoty } from '../../api';
 import { useNavigate } from 'react-router-dom';
 const CategoryItem = (props) => {
+    console.log('Item');
     const { category, id } = props;
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -64,4 +66,4 @@ const CategoryItem = (props) => {
 
 }
 
-export default CategoryItem;
+export default React.memo(CategoryItem);
