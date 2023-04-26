@@ -3,11 +3,13 @@ import { DownOutlined } from '@ant-design/icons'
 import './sidebar.css'
 import { useEffect, useRef, useState } from 'react';
 import { getAllCategory } from '../../api';
+import { useNavigate } from 'react-router-dom';
 const Sidebar = () => {
     const dropdownList = useRef();
     const dropdownIcon = useRef();
     const [category, setCategory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const nagivate = useNavigate();
     const handleCollapse = () => {
         let isCollapse = true;
         return () => {
@@ -23,6 +25,9 @@ const Sidebar = () => {
             }
         }
     }
+    const handleClickBarItem = (id) => {
+        nagivate("/" + id);
+    }
 
     useEffect(() => {
         getAllCategory().then(res => {
@@ -32,9 +37,17 @@ const Sidebar = () => {
     }, [])
     if (isLoading) return <div>LOADING...</div>
     return <div id="sidebar">
-        <SidebarItem>New Post</SidebarItem>
+        <SidebarItem
+            onClick={() => nagivate("/add-post")}
+        >
+            New Post
+        </SidebarItem>
         <SidebarItem>New Category</SidebarItem>
-        <SidebarItem>All Post</SidebarItem>
+        <SidebarItem
+            onClick={() => nagivate("/")}
+        >
+            All Post
+        </SidebarItem>
 
         <SidebarItem>
             <div className='dropdown-item' onClick={handleCollapse()}>
@@ -44,11 +57,17 @@ const Sidebar = () => {
         </SidebarItem>
         <ul className='drop-list' ref={dropdownList}>
             {
-                category.map(item => <li key={item.id}><SidebarItem>{item.name}</SidebarItem></li>)
+                category.map(item => <li
+                    key={item.id}
+                    onClick={() => handleClickBarItem(item.id)}>
+                    <SidebarItem>
+                        {item.name}
+                    </SidebarItem>
+                </li>)
             }
         </ul>
 
-    </div>
+    </div >
 }
 
 

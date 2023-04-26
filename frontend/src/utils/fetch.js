@@ -7,6 +7,6 @@ const instance = axios.create({
 });
 
 instance.defaults.headers[tokenKey] = sessionStorage.getItem(tokenKey);
-
+instance.defaults.headers['Content-Type'] = 'multipart/form-data';
 
 export default instance;

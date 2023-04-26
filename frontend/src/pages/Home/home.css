@@ -9,7 +9,11 @@
     top:0;
 }
 
-#sidebar{
+#side{
     flex-shrink: 0;
     width: 200px;
+}
+#main{
+    width: 85%;
+    margin-left: 2em;
 }

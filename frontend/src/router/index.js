@@ -1,7 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import useLogin from "../hooks/useLogin";
+import AddPost from "../pages/AddPost";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Post from "../pages/Post";
 
 const routerPath = [
     {
@@ -13,7 +15,17 @@ const routerPath = [
 const authRouterPath = [
     {
         path: "/",
-        element: <Home />
+        element: <Home />,
+        children: [{
+            path: "",
+            element: <Post />
+        }, {
+            path: ":categoryId",
+            element: <Post />
+        }, {
+            path: "add-post",
+            element: <AddPost />
+        }]
     }
 ]
 

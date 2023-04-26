@@ -1,4 +1,8 @@
-import axios from "./fetch"
+import axios from "./fetch";
+import debounce from "./debounce";
 
 
-export { axios }
+export {
+    axios,
+    debounce
+}
