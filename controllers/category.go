@@ -39,12 +39,10 @@ func (cc *CategoryController) GetCategory(c *gin.Context) {
 	id := c.Query("id")
 	category, err := cc.cr.Get(c, id)
 	if err != nil {
-		if err != nil {
-			c.JSON(http.StatusGone, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data": category,
