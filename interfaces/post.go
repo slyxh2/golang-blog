@@ -19,7 +19,7 @@ type PostRepository interface {
 	DownLoad(id string) (string, error)
 	Delete(*gin.Context, string) error
 	Edit(*gin.Context, string, string, multipart.File) error
-	GetOne(c *gin.Context, id string) (models.Post, error)
+	GetOne(c *gin.Context, id string) (GetPostResponse, error)
 	GetAll(c *gin.Context, page int, size int, categoryId string) ([]GetAllPostResponse, int, error)
 }
 
@@ -39,4 +39,12 @@ type GetAllPostResponse struct {
 	Header   string             `bson:"header" json:"header"`
 	Date     time.Time          `bson:"date" json:"date"`
 	Category primitive.ObjectID `bson:"category" json:"category"`
+}
+
+type GetPostResponse struct {
+	Id       primitive.ObjectID `bson:"_id" json:"id"`
+	Header   string             `bson:"header" json:"header"`
+	Date     time.Time          `bson:"date" json:"date"`
+	Category primitive.ObjectID `bson:"category" json:"category"`
+	Content  string             `bson:"content" json:"content"`
 }

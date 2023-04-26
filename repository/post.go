@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"math"
 	"mime/multipart"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -178,14 +179,30 @@ func (pr *postRepository) Edit(c *gin.Context, id string, header string, file mu
 	return nil
 }
 
-func (pr *postRepository) GetOne(c *gin.Context, id string) (models.Post, error) {
+func (pr *postRepository) GetOne(c *gin.Context, id string) (interfaces.GetPostResponse, error) {
 	collection := pr.database.Collection(pr.collection)
+	var raw models.Post
+	var post interfaces.GetPostResponse
+	content, err := pr.DownLoad(id)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return post, err
+	}
 	objID, err := primitive.ObjectIDFromHex(id)
-	var post models.Post
+
 	if err != nil {
 		return post, err
 	}
-	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&post)
+	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&raw)
+	post = interfaces.GetPostResponse{
+		Id:       raw.Id,
+		Header:   raw.Header,
+		Date:     raw.Date,
+		Category: raw.Category.Id,
+		Content:  content,
+	}
 	if err != nil {
 		return post, err
 	}
