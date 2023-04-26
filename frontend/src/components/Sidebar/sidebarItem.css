@@ -1,10 +1,13 @@
 #sidebar-item{
-    background-color: #1677ff;
-    color: #fff;
+    background-color: #fff;
+    /* color: #fff; */
     cursor: pointer;
     padding: 0.4em;
-    border-top: 1px solid #fff;
+    /* border-top: 1px solid #000; */
 }
 #sidebar-item:hover{
-    background-color: #0e52b0;
+    background-color: #e4e6eb;
 }
+/* #sidebar-item:first-child{
+    border-top: none;
+} */
