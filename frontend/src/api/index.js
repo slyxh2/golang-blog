@@ -19,8 +19,15 @@ const uploadPost = (file, header, categoryId) => {
     })
 }
 
+const deleteCategory = (id) => {
+    return axios.delete('/delete-category', {
+        params: { id }
+    })
+}
+
 export {
     handleLogin,
     getAllCategory,
-    uploadPost
+    uploadPost,
+    deleteCategory
 }

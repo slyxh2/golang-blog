@@ -35,12 +35,6 @@ const Sidebar = () => {
         setCategory(categoryContext);
         setIsLoading(false);
     }, [categoryContext])
-    // useEffect(() => {
-    //     getAllCategory().then(res => {
-    //         setCategory(res.data.categories);
-    //         setIsLoading(false);
-    //     })
-    // }, [])
     if (isLoading) return <div>LOADING...</div>
 
     return <div id="sidebar">
