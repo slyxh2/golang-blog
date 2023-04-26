@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -132,7 +133,22 @@ func (pc *PostController) GetOnePost(c *gin.Context) {
 }
 
 func (pc *PostController) GetAllPost(c *gin.Context) {
-	posts, err := pc.pr.GetAll(c)
+	categoryId := c.Query("category")
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	posts, totalPage, err := pc.pr.GetAll(c, page, size, categoryId)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
@@ -140,6 +156,8 @@ func (pc *PostController) GetAllPost(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"posts": posts,
+		"posts":      posts,
+		"totalPage":  totalPage,
+		"categoryId": categoryId,
 	})
 }

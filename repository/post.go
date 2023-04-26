@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"io/ioutil"
+	"math"
 	"mime/multipart"
 	"os"
 
@@ -17,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type postRepository struct {
@@ -190,21 +192,46 @@ func (pr *postRepository) GetOne(c *gin.Context, id string) (models.Post, error)
 	return post, nil
 }
 
-func (pr *postRepository) GetAll(c *gin.Context) ([]models.Post, error) {
+func (pr *postRepository) GetAll(c *gin.Context, page int, size int, categoryId string) ([]interfaces.GetAllPostResponse, int, error) {
 	collection := pr.database.Collection(pr.collection)
-	cursor, err := collection.Find(c, bson.M{})
+	filter := bson.M{}
+	if len(categoryId) > 0 {
+		objId, err := primitive.ObjectIDFromHex(categoryId)
+		if err != nil {
+			return nil, 0, err
+		}
+		filter["category._id"] = objId
+	}
+	total, err := collection.CountDocuments(c, filter)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	totalPages := int(math.Ceil(float64(total) / float64(size)))
+	skip := (page - 1) * size
+
+	cursor, err := collection.Find(
+		c,
+		filter,
+		options.Find().SetSkip(int64(skip)).SetLimit(int64(size)),
+	)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer cursor.Close(c)
-	var posts []models.Post
+	var posts []interfaces.GetAllPostResponse
 	for cursor.Next(c) {
-		var post models.Post
-		if err := cursor.Decode(&post); err != nil {
-			return nil, err
+		// var post interfaces.GetAllPostResponse
+		var rawPost models.Post
+		if err := cursor.Decode(&rawPost); err != nil {
+			return nil, 0, err
 		}
-
+		post := interfaces.GetAllPostResponse{
+			Id:       rawPost.Id,
+			Header:   rawPost.Header,
+			Date:     rawPost.Date,
+			Category: rawPost.Category.Id,
+		}
 		posts = append(posts, post)
 	}
-	return posts, nil
+	return posts, totalPages, nil
 }
