@@ -144,37 +144,59 @@ func (pr *postRepository) Delete(c *gin.Context, id string) error {
 	return nil
 }
 
-func (pr *postRepository) Edit(c *gin.Context, id string, header string, file multipart.File) error {
-	if header != "" {
-		collection := pr.database.Collection(pr.collection)
-		objID, err := primitive.ObjectIDFromHex(id)
-		if err != nil {
-			return err
-		}
-		_, err = collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"header": header}})
-		if err != nil {
-			return err
-		}
-	}
-	awsClient := s3.New(pr.awsSession)
-	bucket := os.Getenv("BUCKET_NAME")
-	key := id + ".md"
-	_, err := awsClient.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
-	if err != nil {
-		return err
-	}
+func (pr *postRepository) Edit(c *gin.Context, id string, header string, categoryId string, file multipart.File) error {
 
-	uploader := s3manager.NewUploader(pr.awsSession)
-	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   file,
-	})
+	collection := pr.database.Collection(pr.collection)
+	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
+	}
+	if header != "" {
+		_, err := collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"header": header}})
+		if err != nil {
+			return err
+		}
+	}
+	if categoryId != "" {
+		var category models.Category
+		var post models.Post
+		err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&post)
+		if err != nil {
+			return err
+		}
+		categoryCollection := pr.database.Collection(interfaces.CollectionCategory)
+		newCategoryId, err := primitive.ObjectIDFromHex(categoryId)
+		if err != nil {
+			return err
+		}
+		// pull from old category
+		categoryCollection.FindOneAndUpdate(c, bson.M{"_id": post.Category.Id}, bson.M{"$pull": bson.M{"posts": bson.M{"_id": objID}}})
+		// push to new category
+		categoryCollection.FindOneAndUpdate(c, bson.M{"_id": newCategoryId}, bson.M{"$push": bson.M{"posts": post}}).Decode(&category)
+		// set new category to post
+		collection.FindOneAndUpdate(c, bson.M{"_id": objID}, bson.M{"$set": bson.M{"category": category}})
+	}
+	if file != nil {
+		awsClient := s3.New(pr.awsSession)
+		bucket := os.Getenv("BUCKET_NAME")
+		key := id + ".md"
+		_, err := awsClient.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+		})
+		if err != nil {
+			return err
+		}
+
+		uploader := s3manager.NewUploader(pr.awsSession)
+		_, err = uploader.Upload(&s3manager.UploadInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+			Body:   file,
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

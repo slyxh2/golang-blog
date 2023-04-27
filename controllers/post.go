@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"time"
@@ -93,20 +94,17 @@ func (pc *PostController) EditPost(c *gin.Context) {
 	var request interfaces.EditPostRequest
 	c.ShouldBind(&request)
 	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
+	var readfile multipart.File
+	if err == nil {
+		readfile, err = file.Open()
+		if err != nil {
+			c.JSON(http.StatusGone, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 	}
-	readfile, err := file.Open()
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	err = pc.pr.Edit(c, request.Id, request.Header, readfile)
+	err = pc.pr.Edit(c, request.Id, request.Header, request.Category, readfile)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),

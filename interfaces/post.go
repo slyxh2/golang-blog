@@ -18,7 +18,7 @@ type PostRepository interface {
 	Upload(*gin.Context, multipart.File, *models.Post, string) (*s3manager.UploadOutput, error)
 	DownLoad(id string) (string, error)
 	Delete(*gin.Context, string) error
-	Edit(*gin.Context, string, string, multipart.File) error
+	Edit(c *gin.Context, id string, header string, categoryId string, file multipart.File) error
 	GetOne(c *gin.Context, id string) (GetPostResponse, error)
 	GetAll(c *gin.Context, page int, size int, categoryId string) ([]GetAllPostResponse, int, error)
 }
@@ -30,8 +30,9 @@ type UploadPostRequest struct {
 }
 
 type EditPostRequest struct {
-	Id     string `form:"id" binding:"required"`
-	Header string `form:"header" binding:"required"`
+	Id       string `form:"id" binding:"required"`
+	Header   string `form:"header"`
+	Category string `form:"category"`
 }
 
 type GetAllPostResponse struct {
