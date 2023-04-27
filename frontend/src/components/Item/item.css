@@ -7,7 +7,7 @@
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.5s;
-    margin-bottom: .5em;
+    margin-bottom: 1em;
 }
 .item-container:hover{
     transform: scale(1.01);

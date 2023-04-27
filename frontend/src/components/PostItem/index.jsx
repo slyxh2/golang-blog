@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -33,4 +34,4 @@ const PostItem = (props) => {
     </>
 }
 
-export default PostItem;
+export default React.memo(PostItem);

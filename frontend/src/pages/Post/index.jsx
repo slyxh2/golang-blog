@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-
 import { getPosts } from '../../api';
 import PostItem from '../../components/PostItem';
 import { ITEM_PER_PAGE } from '../../const';
