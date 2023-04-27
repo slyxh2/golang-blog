@@ -1,0 +1,35 @@
+.item-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+    background-color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.5s;
+    margin-bottom: 1em;
+}
+.item-container:hover{
+    transform: scale(1.01);
+}
+.item-container > p{
+    padding-left: 1em;
+}
+.flex-left{
+    margin-left: auto;
+}
+.edit-icon{
+    height: 100%;
+    font-size: 1.2em;
+    transition: color 0.5s;
+}
+.edit-icon:hover{
+    color: #1677ff;
+}
+.delete-icon{
+    padding: 0 1.5em;
+    transition: color 0.5s;
+}
+.delete-icon:hover{
+    color: red;
+}

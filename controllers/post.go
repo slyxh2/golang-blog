@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"mime/multipart"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -92,20 +94,17 @@ func (pc *PostController) EditPost(c *gin.Context) {
 	var request interfaces.EditPostRequest
 	c.ShouldBind(&request)
 	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
+	var readfile multipart.File
+	if err == nil {
+		readfile, err = file.Open()
+		if err != nil {
+			c.JSON(http.StatusGone, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 	}
-	readfile, err := file.Open()
-	if err != nil {
-		c.JSON(http.StatusGone, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	err = pc.pr.Edit(c, request.Id, request.Header, readfile)
+	err = pc.pr.Edit(c, request.Id, request.Header, request.Category, readfile)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
@@ -132,7 +131,22 @@ func (pc *PostController) GetOnePost(c *gin.Context) {
 }
 
 func (pc *PostController) GetAllPost(c *gin.Context) {
-	posts, err := pc.pr.GetAll(c)
+	categoryId := c.Query("category")
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	posts, totalPage, err := pc.pr.GetAll(c, page, size, categoryId)
 	if err != nil {
 		c.JSON(http.StatusGone, gin.H{
 			"message": err.Error(),
@@ -140,6 +154,8 @@ func (pc *PostController) GetAllPost(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"posts": posts,
+		"posts":      posts,
+		"totalPage":  totalPage,
+		"categoryId": categoryId,
 	})
 }

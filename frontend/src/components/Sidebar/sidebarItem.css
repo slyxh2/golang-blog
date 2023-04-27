@@ -1,0 +1,13 @@
+#sidebar-item{
+    background-color: #fff;
+    /* color: #fff; */
+    cursor: pointer;
+    padding: 0.4em;
+    /* border-top: 1px solid #000; */
+}
+#sidebar-item:hover{
+    background-color: #e4e6eb;
+}
+/* #sidebar-item:first-child{
+    border-top: none;
+} */

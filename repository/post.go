@@ -3,7 +3,9 @@ package repository
 import (
 	"errors"
 	"io/ioutil"
+	"math"
 	"mime/multipart"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,6 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type postRepository struct {
@@ -141,70 +144,133 @@ func (pr *postRepository) Delete(c *gin.Context, id string) error {
 	return nil
 }
 
-func (pr *postRepository) Edit(c *gin.Context, id string, header string, file multipart.File) error {
-	if header != "" {
-		collection := pr.database.Collection(pr.collection)
-		objID, err := primitive.ObjectIDFromHex(id)
-		if err != nil {
-			return err
-		}
-		_, err = collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"header": header}})
-		if err != nil {
-			return err
-		}
-	}
-	awsClient := s3.New(pr.awsSession)
-	bucket := os.Getenv("BUCKET_NAME")
-	key := id + ".md"
-	_, err := awsClient.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
-	if err != nil {
-		return err
-	}
+func (pr *postRepository) Edit(c *gin.Context, id string, header string, categoryId string, file multipart.File) error {
 
-	uploader := s3manager.NewUploader(pr.awsSession)
-	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   file,
-	})
+	collection := pr.database.Collection(pr.collection)
+	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
+	}
+	if header != "" {
+		_, err := collection.UpdateByID(c, objID, bson.M{"$set": bson.M{"header": header}})
+		if err != nil {
+			return err
+		}
+	}
+	if categoryId != "" {
+		var category models.Category
+		var post models.Post
+		err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&post)
+		if err != nil {
+			return err
+		}
+		categoryCollection := pr.database.Collection(interfaces.CollectionCategory)
+		newCategoryId, err := primitive.ObjectIDFromHex(categoryId)
+		if err != nil {
+			return err
+		}
+		// pull from old category
+		categoryCollection.FindOneAndUpdate(c, bson.M{"_id": post.Category.Id}, bson.M{"$pull": bson.M{"posts": bson.M{"_id": objID}}})
+		// push to new category
+		categoryCollection.FindOneAndUpdate(c, bson.M{"_id": newCategoryId}, bson.M{"$push": bson.M{"posts": post}}).Decode(&category)
+		// set new category to post
+		collection.FindOneAndUpdate(c, bson.M{"_id": objID}, bson.M{"$set": bson.M{"category": category}})
+	}
+	if file != nil {
+		awsClient := s3.New(pr.awsSession)
+		bucket := os.Getenv("BUCKET_NAME")
+		key := id + ".md"
+		_, err := awsClient.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+		})
+		if err != nil {
+			return err
+		}
+
+		uploader := s3manager.NewUploader(pr.awsSession)
+		_, err = uploader.Upload(&s3manager.UploadInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+			Body:   file,
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (pr *postRepository) GetOne(c *gin.Context, id string) (models.Post, error) {
+func (pr *postRepository) GetOne(c *gin.Context, id string) (interfaces.GetPostResponse, error) {
 	collection := pr.database.Collection(pr.collection)
+	var raw models.Post
+	var post interfaces.GetPostResponse
+	content, err := pr.DownLoad(id)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{
+			"message": err.Error(),
+		})
+		return post, err
+	}
 	objID, err := primitive.ObjectIDFromHex(id)
-	var post models.Post
+
 	if err != nil {
 		return post, err
 	}
-	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&post)
+	err = collection.FindOne(c, bson.M{"_id": objID}).Decode(&raw)
+	post = interfaces.GetPostResponse{
+		Id:       raw.Id,
+		Header:   raw.Header,
+		Date:     raw.Date,
+		Category: raw.Category.Id,
+		Content:  content,
+	}
 	if err != nil {
 		return post, err
 	}
 	return post, nil
 }
 
-func (pr *postRepository) GetAll(c *gin.Context) ([]models.Post, error) {
+func (pr *postRepository) GetAll(c *gin.Context, page int, size int, categoryId string) ([]interfaces.GetAllPostResponse, int, error) {
 	collection := pr.database.Collection(pr.collection)
-	cursor, err := collection.Find(c, bson.M{})
+	filter := bson.M{}
+	if len(categoryId) > 0 {
+		objId, err := primitive.ObjectIDFromHex(categoryId)
+		if err != nil {
+			return nil, 0, err
+		}
+		filter["category._id"] = objId
+	}
+	total, err := collection.CountDocuments(c, filter)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	totalPages := int(math.Ceil(float64(total) / float64(size)))
+	skip := (page - 1) * size
+
+	cursor, err := collection.Find(
+		c,
+		filter,
+		options.Find().SetSkip(int64(skip)).SetLimit(int64(size)),
+	)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer cursor.Close(c)
-	var posts []models.Post
+	var posts []interfaces.GetAllPostResponse
 	for cursor.Next(c) {
-		var post models.Post
-		if err := cursor.Decode(&post); err != nil {
-			return nil, err
+		// var post interfaces.GetAllPostResponse
+		var rawPost models.Post
+		if err := cursor.Decode(&rawPost); err != nil {
+			return nil, 0, err
 		}
-
+		post := interfaces.GetAllPostResponse{
+			Id:       rawPost.Id,
+			Header:   rawPost.Header,
+			Date:     rawPost.Date,
+			Category: rawPost.Category.Id,
+		}
 		posts = append(posts, post)
 	}
-	return posts, nil
+	return posts, totalPages, nil
 }

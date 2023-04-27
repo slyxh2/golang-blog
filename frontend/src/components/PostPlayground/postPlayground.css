@@ -1,0 +1,24 @@
+#text-area{
+    width: 400px;
+    height: 800px;
+    font-size: 2em;
+    resize: none;
+}
+
+#add-post-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+
+#markdown-container{
+    width: 600px;
+    height: 800px;
+    overflow: auto;
+}
+#tools-container{
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 3em;
+}
