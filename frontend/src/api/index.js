@@ -54,6 +54,16 @@ const deletePost = (id) => {
     })
 }
 
+const getPost = (id) => {
+    return axios.get('/getpost', {
+        params: {
+            id
+        }
+    })
+}
+const editPost = (obj) => { //file, header, category
+    return axios.post('/edit-post', obj)
+}
 export {
     handleLogin,
     getAllCategory,
@@ -62,5 +72,7 @@ export {
     editCategoty,
     createCategory,
     getPosts,
-    deletePost
+    deletePost,
+    getPost,
+    editPost
 }

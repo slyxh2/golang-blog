@@ -5,6 +5,7 @@ import AddPost from "../pages/AddPost";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Post from "../pages/Post";
+import EditPost from "../pages/EditPost";
 
 const routerPath = [
     {
@@ -29,6 +30,9 @@ const authRouterPath = [
         }, {
             path: "edit-category",
             element: <EditCategory />
+        }, {
+            path: 'edit-post/:postId',
+            element: <EditPost />
         }]
     }
 ]

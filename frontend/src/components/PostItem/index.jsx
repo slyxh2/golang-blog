@@ -18,6 +18,7 @@ const PostItem = (props) => {
         <Item
             name={header}
             onDelete={() => setDeleteOpen(true)}
+            onEdit={() => nagivate(`/edit-post/${id}`)}
         />
         <Modal
             title={`Are you sure to delete ${header}`}

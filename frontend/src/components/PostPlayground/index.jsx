@@ -6,21 +6,24 @@ import { useNavigate } from 'react-router-dom';
 
 import Markdown from '../../components/Markdown';
 import { debounce } from '../../utils';
-import { uploadPost } from '../../api';
+import { uploadPost, editPost } from '../../api';
 import { CategoryContext } from '../../context';
 
 import './postPlayground.css';
-const PostPlayground = () => {
+const PostPlayground = (props) => {
+    const { header: defaultHeader, category: defaultCategory, content: defaultContent, id: defaultId } = props;
     const textRef = useRef();
     const uploadRef = useRef();
     const nagivate = useNavigate();
     const categoryContext = useContext(CategoryContext);
-    const [input, setInput] = useState(""); // markdown input
+    const [input, setInput] = useState(defaultContent || ""); // markdown input
     const [allCategories, setAllCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [postHeader, setPostHeader] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(defaultCategory || "");
+    const [postHeader, setPostHeader] = useState(defaultHeader || "");
+    const [isContentEdit, setIsContentEdit] = useState(false);
     const handleInput = debounce((e) => {
         setInput(e.target.value);
+        if (isContentEdit === false) setIsContentEdit(true);
     }, 500);
     const handleCategotySelect = (val) => {
         setSelectedCategory(val);
@@ -49,9 +52,25 @@ const PostPlayground = () => {
             nagivate('/');
         }).catch(err => console.log(err));
     }
+    const handleEdit = () => {
+        const params = {};
+        params.id = defaultId;
+        if (defaultHeader !== postHeader) params.header = postHeader;
+        if (defaultCategory !== selectedCategory) params.category = selectedCategory;
+        if (isContentEdit) {
+            const file = new Blob([input], { type: "text/markdown" });
+            params.file = file;
+        }
+        editPost(params).then(data => {
+            nagivate('/');
+        }).catch(err => console.log(err));
+    }
     useEffect(() => {
         setAllCategories(categoryContext);
     }, [categoryContext])
+    useEffect(() => {
+        if (defaultContent) textRef.current.value = defaultContent;
+    }, [defaultContent])
     return <>
         <div id="tools-container">
             <Select
@@ -61,11 +80,16 @@ const PostPlayground = () => {
                 }}
                 onChange={handleCategotySelect}
                 options={allCategories}
-            // defaultValue="6448bab7fd3b06cf47738aaa"
+                defaultValue={defaultCategory}
             />
-            <Input placeholder="Input Post Header" onChange={handelPostHeader} style={{
-                width: 240,
-            }} />
+            <Input
+                placeholder="Input Post Header"
+                onChange={handelPostHeader}
+                style={{
+                    width: 240,
+                }}
+                defaultValue={defaultHeader || ""}
+            />
 
             <div id="markdown-uploader">
                 <Button icon={<UploadOutlined />} onClick={clickUpload}>Click to Upload</Button>
@@ -79,7 +103,9 @@ const PostPlayground = () => {
                 />
 
             </div>
-            <Button icon={<CloudUploadOutlined />} onClick={handlePost}>POST</Button>
+            <Button icon={<CloudUploadOutlined />} onClick={defaultHeader ? handleEdit : handlePost}>
+                {defaultHeader ? "EDIT" : "POST"}
+            </Button>
         </div>
         <div id="add-post-container">
             <textarea id="text-area" onInput={(e) => handleInput(e)} ref={textRef}></textarea>
