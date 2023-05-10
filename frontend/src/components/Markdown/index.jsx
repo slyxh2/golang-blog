@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { solarizedlight } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 const Markdown = ({ post }) => {
-    console.log('markdown')
+    // console.log('markdown')
     return <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         children={post}

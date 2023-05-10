@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useState, useContext } from 'react';
-import { Select, Input, Button, Alert } from 'antd';
+import { Select, Input, Button } from 'antd';
+import MdEditor from 'react-markdown-editor-lite';
+
 import { UploadOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,10 +12,14 @@ import { uploadPost, editPost } from '../../api';
 import { CategoryContext } from '../../context';
 
 import './postPlayground.css';
+import 'react-markdown-editor-lite/lib/index.css';
+
 const PostPlayground = (props) => {
     const { header: defaultHeader, category: defaultCategory, content: defaultContent, id: defaultId } = props;
-    const textRef = useRef();
+    // const textRef = useRef();
     const uploadRef = useRef();
+    const editor = useRef();
+
     const nagivate = useNavigate();
     const categoryContext = useContext(CategoryContext);
     const [input, setInput] = useState(defaultContent || ""); // markdown input
@@ -21,8 +27,9 @@ const PostPlayground = (props) => {
     const [selectedCategory, setSelectedCategory] = useState(defaultCategory || "");
     const [postHeader, setPostHeader] = useState(defaultHeader || "");
     const [isContentEdit, setIsContentEdit] = useState(false);
-    const handleInput = debounce((e) => {
-        setInput(e.target.value);
+    const handleInput = debounce(({ text }) => {
+        // console.log(text);
+        setInput(text);
         if (isContentEdit === false) setIsContentEdit(true);
     }, 500);
     const handleCategotySelect = (val) => {
@@ -36,18 +43,15 @@ const PostPlayground = (props) => {
         const reader = new FileReader();
         reader.onload = () => {
             const fileContent = reader.result;
-            console.log(fileContent);
-            textRef.current.value = fileContent;
-            setInput(fileContent);
+            editor.current.setText(fileContent);
         };
         reader.readAsText(file);
     };
     const clickUpload = () => {
         uploadRef.current.click();
-    }
+    };
     const handlePost = () => {
         const file = new Blob([input], { type: "text/markdown" });
-
         uploadPost(file, postHeader, selectedCategory).then(data => {
             nagivate('/');
         }).catch(err => console.log(err));
@@ -69,7 +73,7 @@ const PostPlayground = (props) => {
         setAllCategories(categoryContext);
     }, [categoryContext])
     useEffect(() => {
-        if (defaultContent) textRef.current.value = defaultContent;
+        if (defaultContent) editor.current.setText(defaultContent);
     }, [defaultContent])
     return <>
         <div id="tools-container">
@@ -107,12 +111,18 @@ const PostPlayground = (props) => {
                 {defaultHeader ? "EDIT" : "POST"}
             </Button>
         </div>
-        <div id="add-post-container">
-            <textarea id="text-area" onInput={(e) => handleInput(e)} ref={textRef}></textarea>
+
+        {/* <textarea id="text-area" onInput={(e) => handleInput(e)} ref={textRef}></textarea>
             <div id="markdown-container">
                 <Markdown post={input} />
-            </div>
-        </div>
+            </div> */}
+        <MdEditor
+            style={{ height: '700px' }}
+            renderHTML={text => <Markdown post={text} />}
+            onChange={handleInput}
+            ref={editor}
+        />
+
     </>
 
 }
