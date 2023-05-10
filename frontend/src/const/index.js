@@ -1,4 +1,4 @@
-const ITEM_PER_PAGE = 12;
+const ITEM_PER_PAGE = 10;
 
 export {
     ITEM_PER_PAGE
