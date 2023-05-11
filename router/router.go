@@ -1,10 +1,6 @@
 package router
 
 import (
-	"log"
-	"os"
-
-	"github.com/fvbock/endless"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/slyxh2/golang-blog/middleware"
@@ -34,11 +30,5 @@ func Init(client *mongo.Client) {
 		})
 	})
 
-	err := endless.ListenAndServe(":8080", router)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Server on 8080 stopped")
-
-	os.Exit(0)
+	router.Run()
 }
