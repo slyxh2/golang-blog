@@ -1,9 +1,9 @@
 import axios from "axios";
 import env from "react-dotenv";
 
-const tokenKey = process.env.AUTH_TOKEN;
+const tokenKey = env.AUTH_TOKEN;
 const instance = axios.create({
-    baseURL: process.env.REQUEST_URL
+    baseURL: env.REQUEST_URL
 });
 
 instance.defaults.headers[tokenKey] = sessionStorage.getItem(tokenKey);

@@ -9,7 +9,7 @@ const Login = () => {
         const { name, password } = values;
         handleLogin(name, password).then(res => {
             console.log(res);
-            sessionStorage.setItem(process.env.AUTH_TOKEN, res.data.token);
+            sessionStorage.setItem(env.AUTH_TOKEN, res.data.token);
             navigate(0);
         })
     };
