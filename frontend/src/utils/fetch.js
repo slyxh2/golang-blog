@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const tokenKey = process.env.AUTH_TOKEN;
+const tokenKey = 'Authorization';
 const instance = axios.create({
-    baseURL: process.env.REQUEST_URL
+    baseURL: 'https://golang-blog-production.up.railway.app'
 });
 
 instance.defaults.headers[tokenKey] = sessionStorage.getItem(tokenKey);
