@@ -1,6 +1,5 @@
 import { Button, Checkbox, Form, Input } from 'antd';
 import { useNavigate } from "react-router-dom";
-import env from "react-dotenv";
 import { handleLogin } from '../../api';
 import './login.css'
 const Login = () => {
@@ -9,7 +8,7 @@ const Login = () => {
         const { name, password } = values;
         handleLogin(name, password).then(res => {
             console.log(res);
-            sessionStorage.setItem(env.AUTH_TOKEN, res.data.token);
+            sessionStorage.setItem(process.env.AUTH_TOKEN, res.data.token);
             navigate(0);
         })
     };
